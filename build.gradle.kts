@@ -15,6 +15,7 @@ repositories {
 
 dependencies {
     implementation("org.json:json:20210307")
+    implementation("com.squareup.okhttp3:okhttp:4.9.1")
 }
 
 

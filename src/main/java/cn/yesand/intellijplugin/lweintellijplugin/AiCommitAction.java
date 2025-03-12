@@ -1,5 +1,12 @@
 package cn.yesand.intellijplugin.lweintellijplugin;
 
+import java.io.StringWriter;
+import java.util.AbstractMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.diff.impl.patch.FilePatch;
@@ -11,15 +18,9 @@ import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vcs.ui.CommitMessage;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcs.commit.AbstractCommitWorkflowHandler;
+
 import git4idea.repo.GitRepository;
 import git4idea.repo.GitRepositoryManager;
-
-import java.io.StringWriter;
-import java.util.AbstractMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 
 public class AiCommitAction extends AnAction {
@@ -32,17 +33,21 @@ public class AiCommitAction extends AnAction {
 
         AbstractCommitWorkflowHandler commitWorkflowHandler = (AbstractCommitWorkflowHandler) e.getData(VcsDataKeys.COMMIT_WORKFLOW_HANDLER);
         List<Change> includedChanges = commitWorkflowHandler.getUi().getIncludedChanges();
-        for (Change change : includedChanges) {
-//            System.out.println(change.getBeforeRevision());
-//            System.out.println(change.getAfterRevision());
-//            System.out.println(change.getVirtualFile().getPath());
-        }
+
         String diff = computeDiff(includedChanges, false, project);
+
+        // 调用 SiliconFlow API 生成提交信息
+        String commitMessageText = "";
+        try {
+            commitMessageText = SiliconFlowApi.generateCommitMessage(diff,project);
+        } catch (Exception ex) {
+            commitMessageText = "Failed to generate commit message: " + ex.getMessage();
+        }
 
         // get the commit message component
         CommitMessage commitMessage = (CommitMessage) VcsDataKeys.COMMIT_MESSAGE_CONTROL.getData(e.getDataContext());
 
-        commitMessage.setCommitMessage(diff);
+        commitMessage.setCommitMessage(commitMessageText);
     }
 
 
