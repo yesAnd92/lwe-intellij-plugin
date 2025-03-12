@@ -22,6 +22,8 @@ import com.intellij.vcs.commit.AbstractCommitWorkflowHandler;
 import git4idea.repo.GitRepository;
 import git4idea.repo.GitRepositoryManager;
 
+import javax.swing.*;
+
 
 public class AiCommitAction extends AnAction {
 
@@ -36,25 +38,53 @@ public class AiCommitAction extends AnAction {
 
         String diff = computeDiff(includedChanges, false, project);
 
-        // 调用 SiliconFlow API 生成提交信息
-        String commitMessageText = "";
-        try {
-            commitMessageText = SiliconFlowApi.generateCommitMessage(diff,project);
-        } catch (Exception ex) {
-            commitMessageText = "Failed to generate commit message: " + ex.getMessage();
-        }
-
         // get the commit message component
         CommitMessage commitMessage = (CommitMessage) VcsDataKeys.COMMIT_MESSAGE_CONTROL.getData(e.getDataContext());
+        if (commitMessage != null) {
+            commitMessage.setCommitMessage("");
+        }
 
-        commitMessage.setCommitMessage(commitMessageText);
+        try {
+            // stream call
+            SiliconFlowApi.generateCommitMessage(diff, project, new SiliconFlowApi.StreamResponseCallback() {
+                @Override
+                public void onMessage(String message) {
+                    SwingUtilities.invokeLater(() -> {
+                        if (commitMessage != null && commitMessage.isDisplayable()) {
+                            // append the message to the commit message
+                            String current = commitMessage.getText() != null
+                                    ? commitMessage.getText()
+                                    : "";
+                            commitMessage.setCommitMessage(current + message);
+                        }
+                    });
+                }
+
+                @Override
+                public void onComplete() {
+                    SwingUtilities.invokeLater(() -> {
+                        if (commitMessage != null) {
+                            commitMessage.requestFocus();
+                        }
+                    });
+                }
+
+
+                @Override
+                public void onError(Throwable throwable) {
+                    throwable.printStackTrace();
+                }
+            });
+        } catch (Exception ex) {
+
+        }
     }
 
 
     public static String computeDiff(List<Change> includedChanges, boolean reversePatch, Project project) {
         GitRepositoryManager gitRepositoryManager = GitRepositoryManager.getInstance(project);
 
-        // 过滤变更并按仓库分组
+        // filter out changes that don't have a virtual file or a repository
         Map<GitRepository, List<Change>> changesByRepository = includedChanges.stream()
                 .filter(change -> !Objects.isNull(change.getVirtualFile()))
                 .map(change -> {
@@ -70,7 +100,7 @@ public class AiCommitAction extends AnAction {
                         Collectors.mapping(AbstractMap.SimpleEntry::getValue, Collectors.toList())
                 ));
 
-        // 为每个仓库计算差异
+        // get repo diff
         return changesByRepository.entrySet().stream()
                 .map(entry -> {
                     GitRepository repository = entry.getKey();

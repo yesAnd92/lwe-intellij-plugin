@@ -8,33 +8,40 @@ import com.intellij.openapi.project.Project;
 
 import okhttp3.*;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.yesand.intellijplugin.lweintellijplugin.prompt.PromptManager;
+
 public class SiliconFlowApi {
     private static OkHttpClient createClient(int timeoutSeconds) {
         return new OkHttpClient.Builder()
-            .connectTimeout(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS)
-            .readTimeout(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS)
-            .writeTimeout(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS)
-            .build();
+                .connectTimeout(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS)
+                .writeTimeout(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS)
+                .build();
     }
 
-    private static final String DEFAULT_PROMPT = "Analyze the provided git diff output and generate structured commit messages following these rules:\n" +
-            "1.Format according to Conventional Commits specification:\n" +
-            "types(Scope):<Short description>\n" +
-            "[BREAKING CHANGE: if applicable]\n" +
-            "Common types: feat, fix, chore, docs, style, refactor, test\n" +
-            "Scope: 2-5 word module name (e.g. \"auth\", \"dashboard\")\n" +
-            "Short_description: Start with imperative verb (\"Add\" not \"Added\") and keep description under 50 characters\n" +
-            "2.Group similar changes (e.g., multiple UI fixes) into single commits\n" +
-            "3.Maximum 5 distinct commits, ordered by importance\n" +
-            "Provide just the formatted commit messages (no explanations) based on the code changes in the diff.";
+    // 添加一个新的接口用于处理流式响应
+    public interface StreamResponseCallback {
+        void onMessage(String message);
+
+        void onComplete();
+
+        void onError(Throwable throwable);
+    }
 
     public static String generateCommitMessage(String diff, Project project) throws IOException {
+        // 使用非流式方式调用
+        return generateCommitMessage(diff, project, null);
+    }
+
+    public static String generateCommitMessage(String diff, Project project, StreamResponseCallback callback) throws IOException {
         AiCommitSettings settings = project.getService(AiCommitSettings.class);
         OkHttpClient client = createClient(settings.getAiSocketTimeout());
         // 读取 prompt 文件
@@ -63,7 +70,7 @@ public class SiliconFlowApi {
 
         Map<String, Object> systemMessage = new HashMap<>();
         systemMessage.put("role", "system");
-        systemMessage.put("content", DEFAULT_PROMPT);
+        systemMessage.put("content", PromptManager.getDefaultPrompt());
         messages.add(systemMessage);
 
         // 构建请求数据
@@ -77,7 +84,10 @@ public class SiliconFlowApi {
             put("type", "text");
         }});
         requestData.put("stop", null);
-        requestData.put("stream", false);
+
+        // 根据是否有回调决定是否使用流式响应
+        boolean isStream = callback != null;
+        requestData.put("stream", isStream);
 
         // 转换为 JSON
         Gson gson = new Gson();
@@ -92,15 +102,88 @@ public class SiliconFlowApi {
                 .addHeader("Content-Type", "application/json")
                 .build();
 
+        // 如果是流式响应
+        if (isStream) {
+            StringBuilder fullResponse = new StringBuilder();
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    if (callback != null) {
+                        callback.onError(e);
+                    }
+                }
 
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) throw new IOException("Unexpected response " + response);
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (!response.isSuccessful()) {
+                        if (callback != null) {
+                            callback.onError(new IOException("Unexpected response " + response));
+                        }
+                        return;
+                    }
 
-            CommonResponse commitResponse = gson.fromJson(
-                    response.body().string(),
-                    CommonResponse.class
-            );
-            return commitResponse.getChoices().get(0).getMessage().getContent();
+                    try (ResponseBody responseBody = response.body()) {
+                        if (responseBody == null) {
+                            if (callback != null) {
+                                callback.onError(new IOException("Response body is null"));
+                            }
+                            return;
+                        }
+
+                        BufferedReader reader = new BufferedReader(
+                                new InputStreamReader(responseBody.byteStream(), "UTF-8"));
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            if (line.isEmpty()) continue;
+                            if (!line.startsWith("data:")) continue;
+
+                            String data = line.substring(5).trim();
+                            if ("[DONE]".equals(data)) {
+                                if (callback != null) {
+                                    callback.onComplete();
+                                }
+                                continue;
+                            }
+
+                            try {
+                                Map<String, Object> eventData = gson.fromJson(data, Map.class);
+                                if (eventData.containsKey("choices")) {
+                                    List<Map<String, Object>> choices = (List<Map<String, Object>>) eventData.get("choices");
+                                    if (!choices.isEmpty()) {
+                                        Map<String, Object> choice = choices.get(0);
+                                        Map<String, Object> delta = (Map<String, Object>) choice.get("delta");
+                                        if (delta != null && delta.containsKey("content")) {
+                                            String content = (String) delta.get("content");
+                                            fullResponse.append(content);
+                                            if (callback != null) {
+                                                callback.onMessage(content);
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (Exception e) {
+                                if (callback != null) {
+                                    callback.onError(e);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 对于流式响应，我们返回null，因为实际内容会通过回调传递
+            return null;
+        } else {
+            // 非流式响应，保持原有逻辑
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) throw new IOException("Unexpected response " + response);
+
+                CommonResponse commitResponse = gson.fromJson(
+                        response.body().string(),
+                        CommonResponse.class
+                );
+                return commitResponse.getChoices().get(0).getMessage().getContent();
+            }
         }
     }
 
