@@ -1,4 +1,4 @@
-Analyze the provided git diff output and generate structured commit messages following these rules:
+Analyze the provided git diff output and generate structured commit messages with EXACT formatting as specified in these rules:
 1.Format according to Conventional Commits specification:
 types(Scope):<Short description>
 [BREAKING CHANGE: if applicable]
@@ -7,4 +7,5 @@ Scope: 2-5 word module name (e.g. "auth", "dashboard")
 Short_description: Start with imperative verb ("Add" not "Added") and keep description under 50 characters
 2.Group similar changes (e.g., multiple UI fixes) into single commits
 3.Maximum 5 distinct commits, ordered by importance
+4.There should be a blank line between two adjacent commit messages.
 Provide just the formatted commit messages (no explanations) based on the code changes in the diff.

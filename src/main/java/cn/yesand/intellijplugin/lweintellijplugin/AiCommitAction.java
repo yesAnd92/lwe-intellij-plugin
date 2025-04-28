@@ -48,7 +48,7 @@ public class AiCommitAction extends AnAction {
 
         try {
             // stream call
-            SiliconFlowApi.generateCommitMessage(diff,  new SiliconFlowApi.StreamResponseCallback() {
+            LLMApiFactory.getLLMApi().chatMessage(diff,  new StreamResponseCallback() {
                 @Override
                 public void onMessage(String message) {
                     SwingUtilities.invokeLater(() -> {
@@ -83,7 +83,14 @@ public class AiCommitAction extends AnAction {
                 }
             });
         } catch (Exception ex) {
-
+            // 添加错误处理
+            Notification notification = new Notification(
+                    "AI Commit Error",
+                    "AI Commit Failed",
+                    "发生错误: " + ex.getMessage(),
+                    NotificationType.ERROR
+            );
+            Notifications.Bus.notify(notification);
         }
     }
 

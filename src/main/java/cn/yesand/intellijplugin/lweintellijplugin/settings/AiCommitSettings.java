@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 )
 @Service(Service.Level.APP)
 public final class AiCommitSettings implements PersistentStateComponent<AiCommitSettings> {
+    private String providerName = "siliconflow";
     private String aiHost = "https://api.openai.com/v1/";
     private String aiProxyUrl = "";
     private int aiSocketTimeout = 30;
@@ -88,4 +89,11 @@ public final class AiCommitSettings implements PersistentStateComponent<AiCommit
         this.promptType = promptType;
     }
 
+    public String getProviderName() {
+        return providerName;
+    }
+
+    public void setProviderName(String providerName) {
+        this.providerName = providerName;
+    }
 }
