@@ -10,9 +10,9 @@ import org.jetbrains.annotations.Nullable;
 
 @State(
     name = "cn.yesand.intellijplugin.lweintellijplugin.settings.AiCommitSettings",
-    storages = @Storage("AiCommitSettings.xml")
+    storages = @Storage("LwePluginSettings.xml")
 )
-@Service(Service.Level.PROJECT)
+@Service(Service.Level.APP)
 public final class AiCommitSettings implements PersistentStateComponent<AiCommitSettings> {
     private String aiHost = "https://api.openai.com/v1/";
     private String aiProxyUrl = "";

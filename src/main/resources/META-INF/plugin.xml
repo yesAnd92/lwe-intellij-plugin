@@ -26,17 +26,19 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-        <projectConfigurable
-                parentId="tools"
+        <applicationConfigurable
                 instance="cn.yesand.intellijplugin.lweintellijplugin.settings.AiCommitSettingsConfigurable"
                 id="cn.yesand.intellijplugin.lweintellijplugin.settings.AiCommitSettingsConfigurable"
                 displayName="Lwe"/>
+        <!-- Add this notification group registration -->
+        <notificationGroup id="AI Commit Error" displayType="BALLOON" />
     </extensions>
+
     <actions>
 
         <action id="lwe.ai.commit.Button"
                 class="cn.yesand.intellijplugin.lweintellijplugin.AiCommitAction"
-                text="AiCommitAction"
+                text="Lwe commit"
                 description="generate  commit message with AI">
             <add-to-group group-id="Vcs.MessageActionGroup" anchor="last"/>
         </action>

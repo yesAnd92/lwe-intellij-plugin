@@ -1,8 +1,8 @@
 package cn.yesand.intellijplugin.lweintellijplugin.settings;
 
+import com.intellij.openapi.application.ApplicationManager; 
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
@@ -14,7 +14,6 @@ import javax.swing.*;
 import java.awt.*;
 
 public class AiCommitSettingsConfigurable implements Configurable {
-    private final Project project;
     private JPanel mainPanel;
     private JBTextField openAiHostField;
     private JBTextField openAiSocketTimeoutField;
@@ -23,9 +22,9 @@ public class AiCommitSettingsConfigurable implements Configurable {
     private ComboBox<String> localeComboBox;
     private ComboBox<String> promptTypeComboBox;
 
-    public AiCommitSettingsConfigurable(Project project) {
-        this.project = project;
+    public AiCommitSettingsConfigurable() {
     }
+
 
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
@@ -61,8 +60,13 @@ public class AiCommitSettingsConfigurable implements Configurable {
         return mainPanel;
     }
 
+    private AiCommitSettings getSettings() { 
+        return ApplicationManager.getApplication().getService(AiCommitSettings.class);
+    }
+
+
     private void loadSettings() {
-        AiCommitSettings settings = project.getService(AiCommitSettings.class);
+        AiCommitSettings settings = getSettings(); 
         openAiHostField.setText(settings.getAiHost());
         openAiSocketTimeoutField.setText(String.valueOf(settings.getAiSocketTimeout()));
         openAiTokenField.setText(settings.getAiToken());
@@ -73,7 +77,7 @@ public class AiCommitSettingsConfigurable implements Configurable {
 
     @Override
     public boolean isModified() {
-        AiCommitSettings settings = project.getService(AiCommitSettings.class);
+        AiCommitSettings settings = getSettings(); 
         return !openAiHostField.getText().equals(settings.getAiHost())
                 || !openAiSocketTimeoutField.getText().equals(String.valueOf(settings.getAiSocketTimeout()))
                 || !openAiTokenField.getText().equals(settings.getAiToken())
@@ -84,7 +88,7 @@ public class AiCommitSettingsConfigurable implements Configurable {
 
     @Override
     public void apply() throws ConfigurationException {
-        AiCommitSettings settings = project.getService(AiCommitSettings.class);
+        AiCommitSettings settings = getSettings(); 
         settings.setAiHost(openAiHostField.getText());
         try {
             settings.setAiSocketTimeout(Integer.parseInt(openAiSocketTimeoutField.getText()));
@@ -92,11 +96,8 @@ public class AiCommitSettingsConfigurable implements Configurable {
             throw new ConfigurationException("Socket timeout must be a valid integer");
         }
         settings.setAiToken(openAiTokenField.getText());
-        settings.setAiModel((String) openAiModelComboBox.getText());
-        try {
-        } catch (NumberFormatException e) {
-            throw new ConfigurationException("Temperature must be a valid number");
-        }
+        settings.setAiModel( openAiModelComboBox.getText());
+        // 移除了空的 try-catch 块
         settings.setLocale((String) localeComboBox.getSelectedItem());
         settings.setPromptType((String) promptTypeComboBox.getSelectedItem());
     }

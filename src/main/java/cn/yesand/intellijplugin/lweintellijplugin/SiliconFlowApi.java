@@ -1,11 +1,11 @@
 package cn.yesand.intellijplugin.lweintellijplugin;
 
 
+import cn.yesand.intellijplugin.lweintellijplugin.prompt.PromptManager;
 import cn.yesand.intellijplugin.lweintellijplugin.settings.AiCommitSettings;
 import cn.yesand.intellijplugin.lweintellijplugin.vo.CommonResponse;
 import com.google.gson.Gson;
-import com.intellij.openapi.project.Project;
-
+import com.intellij.openapi.application.ApplicationManager;
 import okhttp3.*;
 
 import java.io.BufferedReader;
@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import cn.yesand.intellijplugin.lweintellijplugin.prompt.PromptManager;
 
 public class SiliconFlowApi {
     private static OkHttpClient createClient(int timeoutSeconds) {
@@ -36,13 +34,13 @@ public class SiliconFlowApi {
         void onError(Throwable throwable);
     }
 
-    public static String generateCommitMessage(String diff, Project project) throws IOException {
+    public static String generateCommitMessage(String diff) throws IOException {
         // 使用非流式方式调用
-        return generateCommitMessage(diff, project, null);
+        return generateCommitMessage(diff, null);
     }
 
-    public static String generateCommitMessage(String diff, Project project, StreamResponseCallback callback) throws IOException {
-        AiCommitSettings settings = project.getService(AiCommitSettings.class);
+    public static String generateCommitMessage(String diff, StreamResponseCallback callback) throws IOException {
+        AiCommitSettings settings = ApplicationManager.getApplication().getService(AiCommitSettings.class);
         OkHttpClient client = createClient(settings.getAiSocketTimeout());
         // 读取 prompt 文件
 //        String prompt;
