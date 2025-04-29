@@ -21,9 +21,11 @@ public class SiliconFlowApi extends BaseLLMApiImpl {
         AiCommitSettings settings = ApplicationManager.getApplication().getService(AiCommitSettings.class);
 
         String model = settings.getAiModel();
+        String aiHost = settings.getAiHost();
+        String aiToken = settings.getAiToken();
         boolean isStream = Objects.nonNull(callback);
         Map<String, Object> questData = buildRequestData(msg, model, isStream);
-        String result = sendRequest(questData, callback);
+        String result = sendRequest(questData, callback, aiHost, aiToken);
         return result;
     }
 }

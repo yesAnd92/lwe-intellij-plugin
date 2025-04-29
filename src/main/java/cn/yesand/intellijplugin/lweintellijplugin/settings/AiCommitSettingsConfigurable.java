@@ -8,6 +8,9 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
+
+import cn.yesand.intellijplugin.lweintellijplugin.LLMApiFactory;
+
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
@@ -72,6 +75,9 @@ public class AiCommitSettingsConfigurable implements Configurable {
     private void verifyConfiguration() {
         String host = openAiHostField.getText();
         String token = openAiTokenField.getText();
+        String model = openAiModelComboBox.getText();
+        //todo LLM provider
+        String provider = "siliconflow";
         
         if (host.isEmpty() || token.isEmpty()) {
             Messages.showErrorDialog("AI host 和 token 不能为空", "验证失败");
@@ -81,7 +87,8 @@ public class AiCommitSettingsConfigurable implements Configurable {
         // 在后台线程中执行验证，避免阻塞UI
         SwingUtilities.invokeLater(() -> {
             try {
-                boolean isValid = testConnection(host, token);
+
+                boolean isValid =  LLMApiFactory.getLLMApi(provider).sayHello(model, host, token);
                 if (isValid) {
                     Messages.showInfoMessage("配置验证成功！连接到 AI 服务正常。", "验证成功");
                 } else {
@@ -91,24 +98,6 @@ public class AiCommitSettingsConfigurable implements Configurable {
                 Messages.showErrorDialog("验证失败: " + e.getMessage(), "验证失败");
             }
         });
-    }
-    
-    private boolean testConnection(String host, String token) throws IOException {
-        int timeout = 30000;
-                // 简单的连接测试，可以根据实际 API 调整
-        URL url = new URL(host);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setRequestProperty("Authorization", "Bearer " + token);
-        connection.setConnectTimeout(timeout);
-        connection.setReadTimeout(timeout);
-        
-        try {
-            int responseCode = connection.getResponseCode();
-            return responseCode < 400; // 任何非错误响应都视为成功
-        } finally {
-            connection.disconnect();
-        }
     }
 
 

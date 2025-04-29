@@ -7,5 +7,5 @@ public interface LLMApi {
 
     String chatMessage(String msg, StreamResponseCallback callback) throws IOException;
 
-    String sayHello() throws IOException;
+    Boolean sayHello(String model, String host, String token) throws IOException;
 }

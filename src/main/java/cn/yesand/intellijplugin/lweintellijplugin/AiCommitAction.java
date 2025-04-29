@@ -51,6 +51,9 @@ public class AiCommitAction extends AnAction {
             LLMApiFactory.getLLMApi().chatMessage(diff,  new StreamResponseCallback() {
                 @Override
                 public void onMessage(String message) {
+                    if (message == null || message.trim().isEmpty()) {
+                        return;
+                    }
                     SwingUtilities.invokeLater(() -> {
                         if (commitMessage != null && commitMessage.isDisplayable()) {
                             // append the message to the commit message
