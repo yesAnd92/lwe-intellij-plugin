@@ -1,7 +1,6 @@
 package cn.yesand.intellijplugin.lweintellijplugin.prompt;
 
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
+import cn.yesand.intellijplugin.lweintellijplugin.GlobalNotifier;
 
 import java.nio.charset.StandardCharsets;
 
@@ -18,12 +17,7 @@ public class PromptManager {
                 StandardCharsets.UTF_8
             );
         } catch (Exception e) {
-            Notification notification = new Notification(
-                    "AI Commit Error", // Changed group display ID
-                    "AI Commit Failed", // Changed title
-                    "Error: " + e.getMessage(),
-                    NotificationType.ERROR
-            );
+            GlobalNotifier.showWarning(e.getMessage());
             prompt = "";
         }
         DEFAULT_PROMPT = prompt;

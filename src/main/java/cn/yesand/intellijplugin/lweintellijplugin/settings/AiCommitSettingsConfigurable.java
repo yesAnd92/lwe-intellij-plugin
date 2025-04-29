@@ -63,7 +63,7 @@ public class AiCommitSettingsConfigurable implements Configurable {
                 .addComponent(new JSeparator(SwingConstants.HORIZONTAL), 15)
                 .addVerticalGap(15)
                 .addComponent(promptLabel, 0)
-                .addLabeledComponent("Locale", localeComboBox = new ComboBox<>(new String[]{ "en", "zh"}))
+                .addLabeledComponent("Locale", localeComboBox = new ComboBox<>(new String[]{ "English", "Chinese"}))
                 .addLabeledComponent("Prompt", promptTypeComboBox = new ComboBox<>(new String[]{"Basic"}))
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();

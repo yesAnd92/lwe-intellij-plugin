@@ -1,18 +1,27 @@
 package cn.yesand.intellijplugin.lweintellijplugin;
 
-import cn.yesand.intellijplugin.lweintellijplugin.prompt.PromptManager;
-import cn.yesand.intellijplugin.lweintellijplugin.settings.AiCommitSettings;
-import cn.yesand.intellijplugin.lweintellijplugin.vo.CommonResponse;
-import com.google.gson.Gson;
-import com.intellij.openapi.application.ApplicationManager;
-import com.jetbrains.t.i.S;
-
-import okhttp3.*;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.google.gson.Gson;
+import com.intellij.openapi.application.ApplicationManager;
+
+import cn.yesand.intellijplugin.lweintellijplugin.prompt.PromptManager;
+import cn.yesand.intellijplugin.lweintellijplugin.settings.AiCommitSettings;
+import cn.yesand.intellijplugin.lweintellijplugin.vo.CommonResponse;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public abstract class BaseLLMApiImpl implements LLMApi {
 
@@ -24,7 +33,7 @@ public abstract class BaseLLMApiImpl implements LLMApi {
                 .build();
     }
 
-    protected Map<String, Object> buildRequestData(String userContent, String model, boolean isStream) {
+    protected Map<String, Object> buildRequestData(String userContent, String prompt,String model, boolean isStream) {
         List<Map<String, Object>> messages = new ArrayList<>();
         Map<String, Object> userMessage = new HashMap<>();
         userMessage.put("role", "user");
@@ -33,8 +42,14 @@ public abstract class BaseLLMApiImpl implements LLMApi {
 
         Map<String, Object> systemMessage = new HashMap<>();
         systemMessage.put("role", "system");
-        systemMessage.put("content", PromptManager.getDefaultPrompt());
+        systemMessage.put("content", prompt);
         messages.add(systemMessage);
+
+//        Map<String, Object> languageMessage = new HashMap<>();
+//        systemMessage.put("role", "system");
+//        systemMessage.put("content", "You must respond in chinese language");
+//        messages.add(languageMessage);
+
 
         Map<String, Object> requestData = new HashMap<>();
         requestData.put("messages", messages);
@@ -162,7 +177,7 @@ public abstract class BaseLLMApiImpl implements LLMApi {
     @Override
     public String chatMessage(String msg, StreamResponseCallback callback) throws IOException {
         AiCommitSettings settings = ApplicationManager.getApplication().getService(AiCommitSettings.class);
-        Map<String, Object> requestData = buildRequestData(msg, settings.getAiModel(), callback != null);
+        Map<String, Object> requestData = buildRequestData(msg,PromptManager.getDefaultPrompt(), settings.getAiModel(), callback != null);
         return sendRequest(requestData, callback,settings.getAiHost(), settings.getAiToken());
     }
 
