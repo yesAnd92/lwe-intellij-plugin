@@ -1,5 +1,17 @@
 package cn.yesand.intellijplugin.lweintellijplugin.settings;
 
+import java.awt.Font;
+
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+
+import org.jetbrains.annotations.Nls;
+import org.jetbrains.annotations.Nullable;
+
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
@@ -11,23 +23,14 @@ import com.intellij.util.ui.FormBuilder;
 
 import cn.yesand.intellijplugin.lweintellijplugin.LLMApiFactory;
 
-import org.jetbrains.annotations.Nls;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import java.awt.*;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 public class AiCommitSettingsConfigurable implements Configurable {
     private JPanel mainPanel;
     private JBTextField openAiHostField;
     private JBTextField openAiSocketTimeoutField;
     private JBTextField openAiTokenField;
     private JBTextField openAiModelComboBox;
+    private ComboBox<String> providerNameComboBox;
     private ComboBox<String> localeComboBox;
-    private ComboBox<String> promptTypeComboBox;
     private JButton verifyButton;
 
     public AiCommitSettingsConfigurable() {
@@ -53,6 +56,7 @@ public class AiCommitSettingsConfigurable implements Configurable {
 
         mainPanel = FormBuilder.createFormBuilder()
                 .addComponent(aiApiLabel, 0)
+                .addLabeledComponent("AI", providerNameComboBox = new ComboBox<>(new String[]{LLMApiFactory.PROVIDER_SILICONFLOW}))
                 .addLabeledComponent("AI host", openAiHostField = new JBTextField())
                 .addLabeledComponent("AI model", openAiModelComboBox = new JBTextField())
                 .addLabeledComponent("AI token", openAiTokenField = new JBTextField())
@@ -64,7 +68,6 @@ public class AiCommitSettingsConfigurable implements Configurable {
                 .addVerticalGap(15)
                 .addComponent(promptLabel, 0)
                 .addLabeledComponent("Locale", localeComboBox = new ComboBox<>(new String[]{ "English", "Chinese"}))
-                .addLabeledComponent("Prompt", promptTypeComboBox = new ComboBox<>(new String[]{"Basic"}))
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
 
@@ -76,8 +79,8 @@ public class AiCommitSettingsConfigurable implements Configurable {
         String host = openAiHostField.getText();
         String token = openAiTokenField.getText();
         String model = openAiModelComboBox.getText();
-        //todo LLM provider
-        String provider = "siliconflow";
+
+        String provider = (String) providerNameComboBox.getSelectedItem();
         
         if (host.isEmpty() || token.isEmpty()) {
             Messages.showErrorDialog("AI host 和 token 不能为空", "验证失败");
@@ -113,7 +116,6 @@ public class AiCommitSettingsConfigurable implements Configurable {
         openAiTokenField.setText(settings.getAiToken());
         openAiModelComboBox.setText(settings.getAiModel());
         localeComboBox.setSelectedItem(settings.getLocale());
-        promptTypeComboBox.setSelectedItem(settings.getPromptType());
     }
 
     @Override
@@ -123,8 +125,7 @@ public class AiCommitSettingsConfigurable implements Configurable {
                 || !openAiSocketTimeoutField.getText().equals(String.valueOf(settings.getAiSocketTimeout()))
                 || !openAiTokenField.getText().equals(settings.getAiToken())
                 || !openAiModelComboBox.getText().equals(settings.getAiModel())
-                || !localeComboBox.getSelectedItem().equals(settings.getLocale())
-                || !promptTypeComboBox.getSelectedItem().equals(settings.getPromptType());
+                || !localeComboBox.getSelectedItem().equals(settings.getLocale());
     }
 
     @Override
@@ -140,7 +141,6 @@ public class AiCommitSettingsConfigurable implements Configurable {
         settings.setAiModel( openAiModelComboBox.getText());
         // 移除了空的 try-catch 块
         settings.setLocale((String) localeComboBox.getSelectedItem());
-        settings.setPromptType((String) promptTypeComboBox.getSelectedItem());
     }
 
     @Override

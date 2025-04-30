@@ -5,6 +5,9 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+
+import cn.yesand.intellijplugin.lweintellijplugin.LLMApiFactory;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,14 +17,13 @@ import org.jetbrains.annotations.Nullable;
 )
 @Service(Service.Level.APP)
 public final class AiCommitSettings implements PersistentStateComponent<AiCommitSettings> {
-    private String providerName = "siliconflow";
-    private String aiHost = "https://api.openai.com/v1/";
+    private String providerName = LLMApiFactory.PROVIDER_SILICONFLOW;
+    private String aiHost = "https://api.siliconflow.cn/v1/chat/completions";
     private String aiProxyUrl = "";
     private int aiSocketTimeout = 30;
     private String aiToken = "";
-    private String aiModel = "gpt-3.5-turbo";
+    private String aiModel = "deepseek-ai/DeepSeek-V3";
     private String locale = "";
-    private String promptType = "Basic";
 
     @Override
     public @Nullable AiCommitSettings getState() {
@@ -79,14 +81,6 @@ public final class AiCommitSettings implements PersistentStateComponent<AiCommit
 
     public void setLocale(String locale) {
         this.locale = locale;
-    }
-
-    public String getPromptType() {
-        return promptType;
-    }
-
-    public void setPromptType(String promptType) {
-        this.promptType = promptType;
     }
 
     public String getProviderName() {

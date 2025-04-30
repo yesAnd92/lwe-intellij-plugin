@@ -4,6 +4,8 @@ import cn.yesand.intellijplugin.lweintellijplugin.settings.AiCommitSettings;
 import com.intellij.openapi.application.ApplicationManager;
 
 public class LLMApiFactory {
+    public static final String PROVIDER_SILICONFLOW = "siliconflow";
+    
     public static LLMApi getLLMApi() {
 
         AiCommitSettings settings = ApplicationManager.getApplication().getService(AiCommitSettings.class);
@@ -12,7 +14,7 @@ public class LLMApiFactory {
         }
 
         switch (settings.getProviderName()) {
-            case "siliconflow":
+            case PROVIDER_SILICONFLOW:
                 return new SiliconFlowApi();
             default:
                 GlobalNotifier.showError("LLM info is wrong");
@@ -27,7 +29,7 @@ public class LLMApiFactory {
         }
 
         switch (providerName) {
-            case "siliconflow":
+            case PROVIDER_SILICONFLOW:
                 return new SiliconFlowApi();
             default:
                 GlobalNotifier.showError("LLM info is wrong");
