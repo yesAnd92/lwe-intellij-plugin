@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 100 100">
-    <rect width="100" height="100" fill="#ffffff" rx="15"/>
+    <rect width="100" height="100" fill="#fc8fa6" rx="15"/>
     <text x="50" y="65"
           font-family="Arial"
           font-size="50"
           font-weight="bold"
-          fill="#fc8fa6"
+          fill="#ffffff"
           text-anchor="middle">Lwe</text>
 </svg>

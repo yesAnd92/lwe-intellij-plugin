@@ -48,8 +48,8 @@ public class AiCommitSettingsConfigurable implements Configurable {
         JBLabel aiApiLabel = new JBLabel("AI api");
         aiApiLabel.setFont(aiApiLabel.getFont().deriveFont(Font.BOLD, 14));
 
-        JBLabel promptLabel = new JBLabel("Prompt");
-        promptLabel.setFont(promptLabel.getFont().deriveFont(Font.BOLD, 14));
+        JBLabel localeLabel = new JBLabel("Locale");
+        localeLabel.setFont(localeLabel.getFont().deriveFont(Font.BOLD, 14));
 
         verifyButton = new JButton("Connection test");
         verifyButton.addActionListener(e -> verifyConfiguration());
@@ -66,7 +66,7 @@ public class AiCommitSettingsConfigurable implements Configurable {
                 .addVerticalGap(15)
                 .addComponent(new JSeparator(SwingConstants.HORIZONTAL), 15)
                 .addVerticalGap(15)
-                .addComponent(promptLabel, 0)
+                .addComponent(localeLabel, 0)
                 .addLabeledComponent("Locale", localeComboBox = new ComboBox<>(new String[]{ "English", "Chinese"}))
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();

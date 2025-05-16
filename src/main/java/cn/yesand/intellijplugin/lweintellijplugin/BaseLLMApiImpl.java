@@ -33,7 +33,7 @@ public abstract class BaseLLMApiImpl implements LLMApi {
                 .build();
     }
 
-    protected Map<String, Object> buildRequestData(String userContent, String prompt,String model, boolean isStream) {
+    protected Map<String, Object> buildRequestData(String userContent, String prompt, String model, boolean isStream) {
         List<Map<String, Object>> messages = new ArrayList<>();
         Map<String, Object> userMessage = new HashMap<>();
         userMessage.put("role", "user");
@@ -44,12 +44,6 @@ public abstract class BaseLLMApiImpl implements LLMApi {
         systemMessage.put("role", "system");
         systemMessage.put("content", prompt);
         messages.add(systemMessage);
-
-//        Map<String, Object> languageMessage = new HashMap<>();
-//        systemMessage.put("role", "system");
-//        systemMessage.put("content", "You must respond in chinese language");
-//        messages.add(languageMessage);
-
 
         Map<String, Object> requestData = new HashMap<>();
         requestData.put("messages", messages);
@@ -73,7 +67,7 @@ public abstract class BaseLLMApiImpl implements LLMApi {
         OkHttpClient client = createClient(settings.getAiSocketTimeout());
         Gson gson = new Gson();
         String jsonBody = gson.toJson(requestData);
-    
+
         RequestBody body = RequestBody.create(jsonBody, MediaType.get("application/json; charset=utf-8"));
         Request request = new Request.Builder()
                 .url(host)
@@ -81,9 +75,9 @@ public abstract class BaseLLMApiImpl implements LLMApi {
                 .addHeader("Authorization", "Bearer " + token)
                 .addHeader("Content-Type", "application/json")
                 .build();
-    
+
         boolean isStream = (boolean) requestData.getOrDefault("stream", false);
-    
+
         if (isStream) {
             StringBuilder fullResponse = new StringBuilder();
             client.newCall(request).enqueue(new Callback() {
@@ -93,7 +87,7 @@ public abstract class BaseLLMApiImpl implements LLMApi {
                         callback.onError(e);
                     }
                 }
-    
+
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     if (!response.isSuccessful()) {
@@ -102,7 +96,7 @@ public abstract class BaseLLMApiImpl implements LLMApi {
                         }
                         return;
                     }
-    
+
                     try (ResponseBody responseBody = response.body()) {
                         if (responseBody == null) {
                             if (callback != null) {
@@ -110,7 +104,7 @@ public abstract class BaseLLMApiImpl implements LLMApi {
                             }
                             return;
                         }
-    
+
                         BufferedReader reader = new BufferedReader(
                                 new InputStreamReader(responseBody.byteStream(), "UTF-8"));
                         String line;
@@ -119,7 +113,7 @@ public abstract class BaseLLMApiImpl implements LLMApi {
                                 continue;
                             if (!line.startsWith("data:"))
                                 continue;
-    
+
                             String data = line.substring(5).trim();
                             if ("[DONE]".equals(data)) {
                                 if (callback != null) {
@@ -127,7 +121,7 @@ public abstract class BaseLLMApiImpl implements LLMApi {
                                 }
                                 continue;
                             }
-    
+
                             try {
                                 Map<String, Object> eventData = gson.fromJson(data, Map.class);
                                 if (eventData.containsKey("choices")) {
@@ -159,7 +153,7 @@ public abstract class BaseLLMApiImpl implements LLMApi {
             try (Response response = client.newCall(request).execute()) {
                 if (!response.isSuccessful())
                     throw new IOException("Unexpected response " + response);
-    
+
                 CommonResponse commitResponse = gson.fromJson(
                         response.body().string(),
                         CommonResponse.class);
@@ -177,12 +171,18 @@ public abstract class BaseLLMApiImpl implements LLMApi {
     @Override
     public String chatMessage(String msg, StreamResponseCallback callback) throws IOException {
         AiCommitSettings settings = ApplicationManager.getApplication().getService(AiCommitSettings.class);
-        Map<String, Object> requestData = buildRequestData(msg,PromptManager.getDefaultPrompt(), settings.getAiModel(), callback != null);
-        return sendRequest(requestData, callback,settings.getAiHost(), settings.getAiToken());
+        // replace prompt {language} with locale language
+        String defaultLanguage = settings.getLocale();
+        if (defaultLanguage == null || defaultLanguage.isEmpty()) {
+            defaultLanguage = "English";
+        }
+        String prompt = PromptManager.getDefaultPrompt().replace("{language}", defaultLanguage);
+        Map<String, Object> requestData = buildRequestData(msg, prompt, settings.getAiModel(), callback != null);
+        return sendRequest(requestData, callback, settings.getAiHost(), settings.getAiToken());
     }
 
     @Override
-    public Boolean sayHello(String model, String host, String token ) throws IOException {
+    public Boolean sayHello(String model, String host, String token) throws IOException {
         List<Map<String, Object>> messages = new ArrayList<>();
         Map<String, Object> userMessage = new HashMap<>();
         userMessage.put("role", "user");

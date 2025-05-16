@@ -49,24 +49,34 @@ public class AiCommitAction extends AnAction {
         try {
             // stream call
             LLMApiFactory.getLLMApi().chatMessage(diff,  new StreamResponseCallback() {
-                @Override
+                // 用于跟踪消息状态的变量
+                private StringBuilder messageBuffer = new StringBuilder();
+                
                 public void onMessage(String message) {
                     if (message == null || message.trim().isEmpty()) {
                         return;
                     }
+                    
+                    // 将消息添加到缓冲区
+                    messageBuffer.append(message);
+                    
                     SwingUtilities.invokeLater(() -> {
                         if (commitMessage != null && commitMessage.isDisplayable()) {
-                            // append the message to the commit message
-                            String current = commitMessage.getText() != null
-                                    ? commitMessage.getText()
-                                    : "";
-                            commitMessage.setCommitMessage(current + message);
+                            // 直接设置完整的消息
+                            commitMessage.setCommitMessage(messageBuffer.toString());
+                            
+                            // 滚动到最后
+                            commitMessage.getEditorField().getCaretModel().moveToOffset(messageBuffer.length());
+        
                         }
                     });
                 }
-
+                
                 @Override
                 public void onComplete() {
+                    // 重置缓冲区
+                    messageBuffer = new StringBuilder();
+                    
                     SwingUtilities.invokeLater(() -> {
                         if (commitMessage != null) {
                             commitMessage.requestFocus();

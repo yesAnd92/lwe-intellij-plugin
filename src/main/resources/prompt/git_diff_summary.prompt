@@ -7,5 +7,6 @@ Scope: 2-5 word module name (e.g. "auth", "dashboard")
 Short_description: Start with imperative verb ("Add" not "Added") and keep description under 50 characters
 2.Group similar changes (e.g., multiple UI fixes) into single commits
 3.Maximum 5 distinct commits, ordered by importance
-4.There should be a blank line between two adjacent commit messages.
+4.Add a new line for each item.
 Provide just the formatted commit messages (no explanations) based on the code changes in the diff.
+Respond in {language} .
