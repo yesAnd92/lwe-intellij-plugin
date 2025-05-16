@@ -29,6 +29,7 @@
                 displayName="Lwe"/>
         <!-- Add this notification group registration -->
         <notificationGroup id="AI Commit Error" displayType="BALLOON" />
+        <notificationGroup id="LWE Notification Group" displayType="BALLOON" />
     </extensions>
 
     <actions>
@@ -39,6 +40,15 @@
                 description="generate  commit message with AI"
                 icon="icons/lwe16.svg">
             <add-to-group group-id="Vcs.MessageActionGroup" anchor="last"/>
+        </action>
+    
+        <!-- 添加控制台文本转SQL的动作 -->
+        <action id="LWE.ConvertToSql" 
+                class="cn.yesand.intellijplugin.lweintellijplugin.action.ConvertToSqlAction"
+                text="Lwe extract SQL" 
+                description="将选中的控制台文本转换为SQL并复制到剪贴板"
+                icon="icons/lwe16.svg">
+                <add-to-group group-id="ConsoleEditorPopupMenu" anchor="last"/>
         </action>
     </actions>
 </idea-plugin>

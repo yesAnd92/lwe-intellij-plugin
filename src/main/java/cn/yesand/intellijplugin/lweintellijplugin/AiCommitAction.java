@@ -87,7 +87,7 @@ public class AiCommitAction extends AnAction {
                 @Override
                 public void onError(Throwable throwable) {
                     Notification notification = new Notification(
-                            "AI Commit Error", // Changed group display ID
+                            "AI Commit LWE Notification Group", // Changed group display ID
                             "AI Commit Failed", // Changed title
                             "Error: " + throwable.getMessage(),
                             NotificationType.ERROR
@@ -98,7 +98,7 @@ public class AiCommitAction extends AnAction {
         } catch (Exception ex) {
             // 添加错误处理
             Notification notification = new Notification(
-                    "AI Commit Error",
+                    "LWE Notification Group",
                     "AI Commit Failed",
                     "发生错误: " + ex.getMessage(),
                     NotificationType.ERROR
