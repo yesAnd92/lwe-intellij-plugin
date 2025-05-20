@@ -74,9 +74,6 @@ public class AiCommitAction extends AnAction {
                 
                 @Override
                 public void onComplete() {
-                    // 重置缓冲区
-                    messageBuffer = new StringBuilder();
-                    
                     SwingUtilities.invokeLater(() -> {
                         if (commitMessage != null) {
                             commitMessage.requestFocus();

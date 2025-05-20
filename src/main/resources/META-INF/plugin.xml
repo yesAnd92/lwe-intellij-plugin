@@ -45,8 +45,8 @@
         <!-- 添加控制台文本转SQL的动作 -->
         <action id="LWE.ConvertToSql" 
                 class="cn.yesand.intellijplugin.lweintellijplugin.action.ConvertToSqlAction"
-                text="Lwe extract SQL" 
-                description="将选中的控制台文本转换为SQL并复制到剪贴板"
+                text="Sql log parse"
+                description="Parse Mybatis slq log to SQL and copy it to the clipboard"
                 icon="icons/lwe16.svg">
                 <add-to-group group-id="ConsoleEditorPopupMenu" anchor="last"/>
         </action>
