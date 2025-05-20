@@ -1,5 +1,7 @@
-package cn.yesand.intellijplugin.lweintellijplugin;
+package cn.yesand.intellijplugin.lweintellijplugin.action;
 
+import cn.yesand.intellijplugin.lweintellijplugin.LLMApiFactory;
+import cn.yesand.intellijplugin.lweintellijplugin.StreamResponseCallback;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
