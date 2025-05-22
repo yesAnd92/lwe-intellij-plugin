@@ -1,5 +1,6 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
+    <idea-version since-build="223.0" until-build="233.*"/>
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
     <id>cn.yesand.intellijplugin.lwe-intellij-plugin</id>
 
@@ -50,5 +51,17 @@
                 icon="icons/lwe16.svg">
                 <add-to-group group-id="ConsoleEditorPopupMenu" anchor="last"/>
         </action>
-    </actions>
+
+    <action id="cn.yesand.intellijplugin.lweintellijplugin.action.ConvertToJsonAction"
+            class="cn.yesand.intellijplugin.lweintellijplugin.action.ConvertToJsonAction"
+            text="转换为JSON结构" 
+            description="将Java PO对象或Go结构体转换为JSON结构"
+            icon="icons/lwe16.svg">
+        <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+
+    </action>
+    
+    <!-- 在<extensions>标签内添加以下内容（如果尚未添加） -->
+    <notificationGroup id="LWE Notification Group" displayType="BALLOON"/>
+</actions>
 </idea-plugin>

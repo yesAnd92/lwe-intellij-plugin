@@ -16,7 +16,7 @@ public class PromptManager {
                     .readAllBytes(),
                 StandardCharsets.UTF_8
             );
-        } catch (Exception e) {
+        }  catch (Exception e) {
             GlobalNotifier.showWarning(e.getMessage());
             prompt = "";
         }
