@@ -2,11 +2,15 @@ package cn.yesand.intellijplugin.lweintellijplugin.action;
 
 import cn.yesand.intellijplugin.lweintellijplugin.LLMApiFactory;
 import cn.yesand.intellijplugin.lweintellijplugin.StreamResponseCallback;
+import cn.yesand.intellijplugin.lweintellijplugin.prompt.PromptManager;
+import cn.yesand.intellijplugin.lweintellijplugin.prompt.PromptManager.PromptType;
+import cn.yesand.intellijplugin.lweintellijplugin.settings.AiCommitSettings;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diff.impl.patch.FilePatch;
 import com.intellij.openapi.diff.impl.patch.IdeaTextPatchBuilder;
 import com.intellij.openapi.diff.impl.patch.UnifiedDiffWriter;
@@ -49,8 +53,15 @@ public class AiCommitAction extends AnAction {
         }
 
         try {
+            AiCommitSettings settings = ApplicationManager.getApplication().getService(AiCommitSettings.class);
+            // replace prompt {language} with locale language
+            String defaultLanguage = settings.getLocale();
+            if (defaultLanguage == null || defaultLanguage.isEmpty()) {
+                defaultLanguage = "English";
+            }
+            String prompt = PromptManager.getPrompt(PromptType.GIT_DIFF).replace("{language}", defaultLanguage);
             // stream call
-            LLMApiFactory.getLLMApi().chatMessage(diff,  new StreamResponseCallback() {
+            LLMApiFactory.getLLMApi().chatMessage(diff, prompt, new StreamResponseCallback() {
                 // 用于跟踪消息状态的变量
                 private StringBuilder messageBuffer = new StringBuilder();
                 
@@ -86,7 +97,7 @@ public class AiCommitAction extends AnAction {
                 @Override
                 public void onError(Throwable throwable) {
                     Notification notification = new Notification(
-                            "AI Commit LWE Notification Group", // Changed group display ID
+                            "LWE Notification Group", // Changed group display ID
                             "AI Commit Failed", // Changed title
                             "Error: " + throwable.getMessage(),
                             NotificationType.ERROR

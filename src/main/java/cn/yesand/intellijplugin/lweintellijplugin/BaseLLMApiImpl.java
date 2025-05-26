@@ -164,19 +164,13 @@ public abstract class BaseLLMApiImpl implements LLMApi {
 
     // 子类只需实现chatMessage和generateCommitMessage的参数拼装
     @Override
-    public String chatMessage(String msg) throws IOException {
-        return chatMessage(msg, null);
+    public String chatMessage(String msg,String prompt) throws IOException {
+        return chatMessage(msg, prompt,null);
     }
 
     @Override
-    public String chatMessage(String msg, StreamResponseCallback callback) throws IOException {
+    public String chatMessage(String msg,String prompt, StreamResponseCallback callback) throws IOException {
         AiCommitSettings settings = ApplicationManager.getApplication().getService(AiCommitSettings.class);
-        // replace prompt {language} with locale language
-        String defaultLanguage = settings.getLocale();
-        if (defaultLanguage == null || defaultLanguage.isEmpty()) {
-            defaultLanguage = "English";
-        }
-        String prompt = PromptManager.getDefaultPrompt().replace("{language}", defaultLanguage);
         Map<String, Object> requestData = buildRequestData(msg, prompt, settings.getAiModel(), callback != null);
         return sendRequest(requestData, callback, settings.getAiHost(), settings.getAiToken());
     }

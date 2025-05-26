@@ -29,7 +29,6 @@
                 id="cn.yesand.intellijplugin.lweintellijplugin.settings.AiCommitSettingsConfigurable"
                 displayName="Lwe"/>
         <!-- Add this notification group registration -->
-        <notificationGroup id="AI Commit Error" displayType="BALLOON" />
         <notificationGroup id="LWE Notification Group" displayType="BALLOON" />
     </extensions>
 
@@ -60,8 +59,5 @@
         <add-to-group group-id="EditorPopupMenu" anchor="last"/>
 
     </action>
-    
-    <!-- 在<extensions>标签内添加以下内容（如果尚未添加） -->
-    <notificationGroup id="LWE Notification Group" displayType="BALLOON"/>
 </actions>
 </idea-plugin>
