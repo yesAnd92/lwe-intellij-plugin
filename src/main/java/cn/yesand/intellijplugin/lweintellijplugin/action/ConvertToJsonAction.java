@@ -45,13 +45,14 @@ public class ConvertToJsonAction extends AnAction {
         }
 
         //提交给LLM完善value值
-        String adviceJson = "";
-        try {
-            String prompt=PromptManager.getPrompt(PromptType.JSON_VALUE);
-            adviceJson = LLMApiFactory.getLLMApi().chatMessage(json,prompt);
-        } catch (IOException ex) {
-            GlobalNotifier.notifyError(project, ex.getMessage());
-        }
+        String adviceJson = json;
+        //LLM补全效果并不好，耗时长，暂且不处理
+//        try {
+//            String prompt=PromptManager.getPrompt(PromptType.JSON_VALUE);
+//            adviceJson = LLMApiFactory.getLLMApi().chatMessage(json,prompt);
+//        } catch (IOException ex) {
+//            GlobalNotifier.notifyError(project, ex.getMessage());
+//        }
 
         if (adviceJson != null) {
             ClipboardUtil.setClipboardText(adviceJson);
