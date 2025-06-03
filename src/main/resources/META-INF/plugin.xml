@@ -14,7 +14,20 @@
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
-    <description>a toolbox help developer to leave work early!</description>
+    <description><![CDATA[
+            <b>Lwe - 助力开发者高效工作的智能工具箱</b>
+
+            <ul>
+              <li>✈️ AI 提交消息生成 - 基于代码变更智能生成规范的 Git Commit Message</li>
+              <li>🛠 SQL 日志解析 - 快速转换 MyBatis SQL 日志为可执行语句并复制到剪贴板</li>
+              <li>🔄 JSON 结构转换 - 一键将 Java POJO / Go Struct 转换为 JSON 数据结构</li>
+            </ul>
+
+            🚀 项目地址: <a href="https://github.com/yesAnd92/lwe-intellij-plugin">GitHub</a>
+
+            <small>✨ 让您专注于核心开发，告别重复性工作！</small>
+            ]]>
+    </description>
 
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
@@ -29,7 +42,7 @@
                 id="cn.yesand.intellijplugin.lweintellijplugin.settings.AiCommitSettingsConfigurable"
                 displayName="Lwe"/>
         <!-- Add this notification group registration -->
-        <notificationGroup id="LWE Notification Group" displayType="BALLOON" />
+        <notificationGroup id="LWE Notification Group" displayType="BALLOON"/>
     </extensions>
 
     <actions>
@@ -41,23 +54,23 @@
                 icon="icons/lwe16.svg">
             <add-to-group group-id="Vcs.MessageActionGroup" anchor="last"/>
         </action>
-    
+
         <!-- 添加控制台文本转SQL的动作 -->
-        <action id="LWE.ConvertToSql" 
+        <action id="LWE.ConvertToSql"
                 class="cn.yesand.intellijplugin.lweintellijplugin.action.ConvertToSqlAction"
                 text="Sql log parse"
                 description="Parse Mybatis slq log to SQL and copy it to the clipboard"
                 icon="icons/lwe16.svg">
-                <add-to-group group-id="ConsoleEditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="ConsoleEditorPopupMenu" anchor="last"/>
         </action>
 
-    <action id="cn.yesand.intellijplugin.lweintellijplugin.action.ConvertToJsonAction"
-            class="cn.yesand.intellijplugin.lweintellijplugin.action.ConvertToJsonAction"
-            text="转换为JSON结构" 
-            description="将Java PO对象或Go结构体转换为JSON结构"
-            icon="icons/lwe16.svg">
-        <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        <action id="cn.yesand.intellijplugin.lweintellijplugin.action.ConvertToJsonAction"
+                class="cn.yesand.intellijplugin.lweintellijplugin.action.ConvertToJsonAction"
+                text="转换为JSON结构"
+                description="将Java PO对象或Go结构体转换为JSON结构"
+                icon="icons/lwe16.svg">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
 
-    </action>
-</actions>
+        </action>
+    </actions>
 </idea-plugin>
