@@ -14,18 +14,16 @@
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
-    <description><![CDATA[
-            <b>Lwe - 助力开发者高效工作的智能工具箱</b>
-
+    <description><![CDATA[<b>Lwe - Intelligent Toolbox for Efficient Development (助力开发者高效工作的智能工具箱)</b>
             <ul>
-              <li>✈️ AI 提交消息生成 - 基于代码变更智能生成规范的 Git Commit Message</li>
-              <li>🛠 SQL 日志解析 - 快速转换 MyBatis SQL 日志为可执行语句并复制到剪贴板</li>
-              <li>🔄 JSON 结构转换 - 一键将 Java POJO / Go Struct 转换为 JSON 数据结构</li>
+              <li>✈️ AI Commit Message Generator - Generate standardized Git Commit Messages based on code changes (基于代码变更智能生成规范的 Git Commit Message)</li>
+              <li>🛠 SQL Log Parser - Quickly convert MyBatis SQL logs to executable statements and copy to clipboard (快速转换 MyBatis SQL 日志为可执行语句并复制到剪贴板)</li>
+              <li>🔄 JSON Structure Converter - Convert Java POJO / Go Struct to JSON data structure with one click (一键将 Java POJO / Go Struct 转换为 JSON 数据结构)</li>
             </ul>
 
-            🚀 项目地址: <a href="https://github.com/yesAnd92/lwe-intellij-plugin">GitHub</a>
+            🚀 Project URL: <a href="https://github.com/yesAnd92/lwe-intellij-plugin">GitHub</a>
 
-            <small>✨ 让您专注于核心开发，告别重复性工作！</small>
+            <small>✨ Focus on core development and say goodbye to repetitive work! (让您专注于核心开发，告别重复性工作！)</small>
             ]]>
     </description>
 
