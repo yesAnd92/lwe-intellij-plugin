@@ -14,21 +14,27 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diff.impl.patch.FilePatch;
 import com.intellij.openapi.diff.impl.patch.IdeaTextPatchBuilder;
 import com.intellij.openapi.diff.impl.patch.UnifiedDiffWriter;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.VcsDataKeys;
 import com.intellij.openapi.vcs.changes.Change;
+import com.intellij.openapi.vcs.changes.ContentRevision;
 import com.intellij.openapi.vcs.ui.CommitMessage;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.vcs.commit.AbstractCommitWorkflowHandler;
 import git4idea.repo.GitRepository;
 import git4idea.repo.GitRepositoryManager;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.StringWriter;
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class AiCommitAction extends AnAction {
@@ -50,6 +56,11 @@ public class AiCommitAction extends AnAction {
         CommitMessage commitMessage = (CommitMessage) VcsDataKeys.COMMIT_MESSAGE_CONTROL.getData(e.getDataContext());
         if (commitMessage != null) {
             commitMessage.setCommitMessage("");
+            // 启用软换行，使大模型返回的长 commit message 在输入框内自动换行显示
+            Editor editor = commitMessage.getEditorField().getEditor();
+            if (editor != null) {
+                editor.getSettings().setUseSoftWraps(true);
+            }
         }
 
         try {
@@ -75,12 +86,9 @@ public class AiCommitAction extends AnAction {
                     
                     SwingUtilities.invokeLater(() -> {
                         if (commitMessage != null && commitMessage.isDisplayable()) {
-                            // 直接设置完整的消息
-                            commitMessage.setCommitMessage(messageBuffer.toString());
-                            
-                            // 滚动到最后
-                            commitMessage.getEditorField().getCaretModel().moveToOffset(messageBuffer.length());
-        
+                            String normalized = normalizeCommitMessage(messageBuffer.toString());
+                            commitMessage.setCommitMessage(normalized);
+                            commitMessage.getEditorField().getCaretModel().moveToOffset(normalized.length());
                         }
                     });
                 }
@@ -117,14 +125,49 @@ public class AiCommitAction extends AnAction {
         }
     }
 
+    /**
+     * 规范化 commit 消息：统一换行符为 \n，并去除模型可能输出的列表前缀（如 "1." "-"），
+     * 确保每条 commit 在编辑框中单独一行显示。
+     */
+    private static String normalizeCommitMessage(String raw) {
+        if (raw == null || raw.isEmpty()) return raw;
+        String unified = raw.replace("\r\n", "\n").replace("\r", "\n");
+        String[] lines = unified.split("\n");
+        Pattern listPrefix = Pattern.compile("^(\\d+[.)]\\s*|-\\s*)");
+        String result = Arrays.stream(lines)
+                .map(String::trim)
+                .map(line -> listPrefix.matcher(line).replaceFirst(""))
+                .filter(line -> !line.isEmpty())
+                .collect(Collectors.joining("\n"));
+        return result.isEmpty() ? unified.trim() : result;
+    }
+
+    /**
+     * 从 Change 解析出对应的 VirtualFile，兼容新增文件（getVirtualFile() 可能为 null 时从 ContentRevision 取路径）。
+     */
+    private static VirtualFile getVirtualFileForChange(Change change) {
+        VirtualFile vf = change.getVirtualFile();
+        if (vf != null) return vf;
+        ContentRevision after = change.getAfterRevision();
+        if (after != null && after.getFile() != null) {
+            vf = LocalFileSystem.getInstance().findFileByIoFile(new File(after.getFile().getPath()));
+            if (vf != null) return vf;
+        }
+        ContentRevision before = change.getBeforeRevision();
+        if (before != null && before.getFile() != null) {
+            vf = LocalFileSystem.getInstance().findFileByIoFile(new File(before.getFile().getPath()));
+            if (vf != null) return vf;
+        }
+        return null;
+    }
+
     public static String computeDiff(List<Change> includedChanges, boolean reversePatch, Project project) {
         GitRepositoryManager gitRepositoryManager = GitRepositoryManager.getInstance(project);
 
-        // filter out changes that don't have a virtual file or a repository
+        // 使用 getVirtualFileForChange 以便包含新增文件（getVirtualFile() 可能为 null 的 change）
         Map<GitRepository, List<Change>> changesByRepository = includedChanges.stream()
-                .filter(change -> !Objects.isNull(change.getVirtualFile()))
                 .map(change -> {
-                    VirtualFile file = change.getVirtualFile();
+                    VirtualFile file = getVirtualFileForChange(change);
                     if (file == null)
                         return null;
                     GitRepository repository = gitRepositoryManager.getRepositoryForFileQuick(file);

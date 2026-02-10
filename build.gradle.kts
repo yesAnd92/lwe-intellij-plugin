@@ -11,6 +11,7 @@ repositories {
     maven {
         url = uri("https://maven.aliyun.com/repository/public")
     }
+    mavenCentral() // IntelliJ Platform 等依赖
 }
 
 dependencies {
@@ -22,9 +23,9 @@ dependencies {
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
-//  version.set("2022.2.5")
-//  type.set("IC") // Target IDE Platform
-    localPath.set("/Users/wangyj/Library/Application Support/JetBrains/Toolbox/apps/IDEA-U/ch-0/231.9392.1/IntelliJ IDEA.app/Contents")
+    // 使用版本号构建，不依赖本机 IDEA 路径，便于 CI 与高版本 IDE 兼容
+    version.set("2023.3")
+    type.set("IC") // IntelliJ IDEA Community，与 IU 兼容
     plugins.set(listOf("Git4Idea"))
 }
 
@@ -40,7 +41,8 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("222")
-        untilBuild.set("232.*")
+        // 声明兼容到 2025.3（253），高版本 IDEA 可正常加载；后续可再提高
+        untilBuild.set("253.*")
     }
 
     signPlugin {

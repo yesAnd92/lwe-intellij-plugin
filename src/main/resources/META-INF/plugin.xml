@@ -1,6 +1,7 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <idea-version since-build="223.0" until-build="233.*"/>
+    <!-- 不设置 until-build 表示兼容所有更高版本 IDE（开放末端兼容） -->
+    <idea-version since-build="223.0"/>
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
     <id>cn.yesand.intellijplugin.lwe-intellij-plugin</id>
 
